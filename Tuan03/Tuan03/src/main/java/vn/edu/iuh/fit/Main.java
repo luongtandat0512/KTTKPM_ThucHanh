@@ -1,9 +1,6 @@
 package vn.edu.iuh.fit;
 
-import vn.edu.iuh.fit.singleton.EagerInitialization;
-import vn.edu.iuh.fit.singleton.LazyInitialization;
-import vn.edu.iuh.fit.singleton.StaticBlockInitialization;
-import vn.edu.iuh.fit.singleton.ThreadSafeInitialization;
+import vn.edu.iuh.fit.singleton.*;
 
 public class Main {
     public static void main(String[] args) {
@@ -26,15 +23,23 @@ public class Main {
 //        System.out.println("Lazy Initialization 6 :" + singleton6.hashCode());
 //
         // Thread Safe Initialization
-        ThreadSafeInitialization singleton7 = ThreadSafeInitialization.getInstance();
-        System.out.println("Thread Safe Initialization 7 :" + singleton7.hashCode());
-        ThreadSafeInitialization singleton8 = ThreadSafeInitialization.getInstance();
-        System.out.println("Thread Safe Initialization 8 :" + singleton8.hashCode());
+//        ThreadSafeInitialization singleton7 = ThreadSafeInitialization.getInstance();
+//        System.out.println("Thread Safe Initialization 7 :" + singleton7.hashCode());
+//        ThreadSafeInitialization singleton8 = ThreadSafeInitialization.getInstance();
+//        System.out.println("Thread Safe Initialization 8 :" + singleton8.hashCode());
+//
+//        ThreadSafeInitialization singleton9 = ThreadSafeInitialization.getInstanceUsingDoubleLocking();
+//        System.out.println("Thread Safe Initialization Using Double Locking 9 :" + singleton9.hashCode());
+//        ThreadSafeInitialization singleton10 = ThreadSafeInitialization.getInstanceUsingDoubleLocking();
+//        System.out.println("Thread Safe Initialization Using Double Locking 10 :" + singleton10.hashCode());
 
-        ThreadSafeInitialization singleton9 = ThreadSafeInitialization.getInstanceUsingDoubleLocking();
-        System.out.println("Thread Safe Initialization Using Double Locking 9 :" + singleton9.hashCode());
-        ThreadSafeInitialization singleton10 = ThreadSafeInitialization.getInstanceUsingDoubleLocking();
-        System.out.println("Thread Safe Initialization Using Double Locking 10 :" + singleton10.hashCode());
+        // Bill Pugh Initialization
+        BillPughInitialization singleton11 = BillPughInitialization.getInstance();
+        System.out.println("Bill Pugh Initialization 11 :" + singleton11.hashCode());
+        BillPughInitialization singleton12 = BillPughInitialization.getInstance();
+        System.out.println("Bill Pugh Initialization 12 :" + singleton12.hashCode());
+
     }
+
 
 }
