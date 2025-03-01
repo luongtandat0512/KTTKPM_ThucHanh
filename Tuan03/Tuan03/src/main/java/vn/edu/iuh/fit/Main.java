@@ -3,6 +3,7 @@ package vn.edu.iuh.fit;
 import vn.edu.iuh.fit.singleton.EagerInitialization;
 import vn.edu.iuh.fit.singleton.LazyInitialization;
 import vn.edu.iuh.fit.singleton.StaticBlockInitialization;
+import vn.edu.iuh.fit.singleton.ThreadSafeInitialization;
 
 public class Main {
     public static void main(String[] args) {
@@ -19,10 +20,21 @@ public class Main {
 //        System.out.println("Static Block Initialization 4 :" + singleton3.hashCode());
 
         // Lazy Initialization
-        LazyInitialization singleton5 = LazyInitialization.getInstance();
-        System.out.println("Lazy Initialization 5 :" + singleton5.hashCode());
-        LazyInitialization singleton6 = LazyInitialization.getInstance();
-        System.out.println("Lazy Initialization 6 :" + singleton6.hashCode());
+//        LazyInitialization singleton5 = LazyInitialization.getInstance();
+//        System.out.println("Lazy Initialization 5 :" + singleton5.hashCode());
+//        LazyInitialization singleton6 = LazyInitialization.getInstance();
+//        System.out.println("Lazy Initialization 6 :" + singleton6.hashCode());
+//
+        // Thread Safe Initialization
+        ThreadSafeInitialization singleton7 = ThreadSafeInitialization.getInstance();
+        System.out.println("Thread Safe Initialization 7 :" + singleton7.hashCode());
+        ThreadSafeInitialization singleton8 = ThreadSafeInitialization.getInstance();
+        System.out.println("Thread Safe Initialization 8 :" + singleton8.hashCode());
+
+        ThreadSafeInitialization singleton9 = ThreadSafeInitialization.getInstanceUsingDoubleLocking();
+        System.out.println("Thread Safe Initialization Using Double Locking 9 :" + singleton9.hashCode());
+        ThreadSafeInitialization singleton10 = ThreadSafeInitialization.getInstanceUsingDoubleLocking();
+        System.out.println("Thread Safe Initialization Using Double Locking 10 :" + singleton10.hashCode());
     }
 
 }
