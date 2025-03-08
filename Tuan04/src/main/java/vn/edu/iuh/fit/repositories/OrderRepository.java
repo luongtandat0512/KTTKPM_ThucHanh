@@ -14,6 +14,4 @@ import vn.edu.iuh.fit.entities.Order;
  */
 public interface OrderRepository {
     void processOrder(Order order);
-    void cancelOrder(Order order);
-    void doneOrder(Order order);
 }

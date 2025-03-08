@@ -1,5 +1,5 @@
 /*
- * @ (#) OrderRepositoryImpl.java       1.0     3/8/2025
+ * @ (#) ProcessingOrderRepositoryImpl.java       1.0     3/8/2025
  *
  * Copyright (c) 2025. All rights reserved.
  */
@@ -13,19 +13,11 @@ package vn.edu.iuh.fit.repositories;
 import vn.edu.iuh.fit.entities.Order;
 import vn.edu.iuh.fit.enums.OrderState;
 
-public class OrderRepositoryImpl implements OrderRepository{
+public class ProcessingOrderRepositoryImpl implements OrderRepository{
+
     @Override
     public void processOrder(Order order) {
         order.setState(OrderState.PROCESSING);
-    }
-
-    @Override
-    public void cancelOrder(Order order) {
-        order.setState(OrderState.CANCEL);
-    }
-
-    @Override
-    public void doneOrder(Order order) {
-        order.setState(OrderState.DONE);
+        System.out.println("Processing order: " + order.getName());
     }
 }
