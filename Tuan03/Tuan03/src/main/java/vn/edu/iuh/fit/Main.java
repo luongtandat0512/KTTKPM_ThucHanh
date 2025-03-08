@@ -23,14 +23,14 @@ public class Main {
 //        System.out.println("Lazy Initialization 6 :" + singleton6.hashCode());
 //
         // Thread Safe Initialization
-        new Thread(() -> {
-            ThreadSafeInitialization singleton7 = ThreadSafeInitialization.getInstance();
-            System.out.println("Thread Safe Initialization 7 :" + singleton7.hashCode());
-        }).start();
-        new Thread(() -> {
-            ThreadSafeInitialization singleton8 = ThreadSafeInitialization.getInstance();
-            System.out.println("Thread Safe Initialization 8 :" + singleton8.hashCode());
-        }).start();
+//        new Thread(() -> {
+//            ThreadSafeInitialization singleton7 = ThreadSafeInitialization.getInstance();
+//            System.out.println("Thread Safe Initialization 7 :" + singleton7.hashCode());
+//        }).start();
+//        new Thread(() -> {
+//            ThreadSafeInitialization singleton8 = ThreadSafeInitialization.getInstance();
+//            System.out.println("Thread Safe Initialization 8 :" + singleton8.hashCode());
+//        }).start();
 //
 //        ThreadSafeInitialization singleton9 = ThreadSafeInitialization.getInstanceUsingDoubleLocking();
 //        System.out.println("Thread Safe Initialization Using Double Locking 9 :" + singleton9.hashCode());
@@ -44,8 +44,8 @@ public class Main {
 //        System.out.println("Bill Pugh Initialization 12 :" + singleton12.hashCode());
 
         // Using Reflection to destroy Singleton Pattern
-//        EagerInitialization singleton = EagerInitialization.getInstance();
-//        EagerInitialization singletonTwo = null;
+        EagerInitialization singleton = EagerInitialization.getInstance();
+        EagerInitialization singletonTwo = null;
 
     }
 
