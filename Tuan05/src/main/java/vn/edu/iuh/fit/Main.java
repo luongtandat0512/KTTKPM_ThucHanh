@@ -1,7 +1,26 @@
 package vn.edu.iuh.fit;
 
+import vn.edu.iuh.fit.FileExample.Directory;
+import vn.edu.iuh.fit.FileExample.File;
+
 public class Main {
     public static void main(String[] args) {
+        // Observer Pattern Example
+        Directory directory = new Directory("Documents");
+        Directory directory1 = new Directory("Downloads");
+        File file = new File("1", 100);
+        File file1 = new File("2", 200);
+        File file2 = new File("3", 300);
+
+        directory.register(file);
+        directory.register(file1);
+        directory1.register(file2);
+
+        directory.notify(null);
+        directory1.notify(null);
+
+        /*
+        // Observer Pattern Example
         Stock stock = new Stock("Google", 1000);
         Stock stock1 = new Stock("Apple", 2000);
         Investor investor1 = new Investor("A");
@@ -32,6 +51,6 @@ public class Main {
 
         task1.setStatus("Test");
 
-
+*/
     }
 }

@@ -1,32 +1,36 @@
 /*
- * @ (#) Task.java       1.0     3/15/2025
+ * @ (#) Investor.java       1.0     3/15/2025
  *
  * Copyright (c) 2025. All rights reserved.
  */
 
-package vn.edu.iuh.fit;
+package vn.edu.iuh.fit.StockExample;
 /*
  * @author: Luong Tan Dat
  * @date: 3/15/2025
  */
 
+import vn.edu.iuh.fit.ComposePattern.Observer;
+import vn.edu.iuh.fit.ComposePattern.Subject;
+
 import java.util.ArrayList;
 import java.util.List;
 
-public class Task implements Subject{
+public class Stock implements Subject {
     private String name;
-    private String status;
+    private double price;
     private List<Observer> observers = new ArrayList<>();
 
-    public Task(String name, String status) {
+    public Stock(String name, double price) {
         this.name = name;
-        this.status = status;
+        this.price = price;
     }
 
-    public void setStatus(String status){
-        this.status = status;
-        notify("The status of " + name + " has changed to " + status);
+    public void setPrice(double price){
+        this.price = price;
+        notify("The price of " + name + " has changed to " + price);
     }
+
     @Override
     public void register(Observer observer) {
         observers.add(observer);

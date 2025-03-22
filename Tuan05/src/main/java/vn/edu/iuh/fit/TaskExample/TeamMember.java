@@ -1,19 +1,21 @@
 /*
- * @ (#) Investor.java       1.0     3/15/2025
+ * @ (#) TeamMember.java       1.0     3/15/2025
  *
  * Copyright (c) 2025. All rights reserved.
  */
 
-package vn.edu.iuh.fit;
+package vn.edu.iuh.fit.TaskExample;
 /*
  * @author: Luong Tan Dat
  * @date: 3/15/2025
  */
 
-public class Investor implements Observer{
+import vn.edu.iuh.fit.ComposePattern.Observer;
+
+public class TeamMember implements Observer {
     private String name;
 
-    public Investor(String name) {
+    public TeamMember(String name) {
         this.name = name;
     }
 

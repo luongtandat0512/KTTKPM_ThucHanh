@@ -4,7 +4,7 @@
  * Copyright (c) 2025. All rights reserved.
  */
 
-package vn.edu.iuh.fit;
+package vn.edu.iuh.fit.ComposePattern;
 
 /*
  * @author: Luong Tan Dat
