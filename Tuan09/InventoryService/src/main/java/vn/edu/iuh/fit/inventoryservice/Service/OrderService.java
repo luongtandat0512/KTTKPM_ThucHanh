@@ -11,113 +11,112 @@ package vn.edu.iuh.fit.inventoryservice.Service;
  */
 
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
-import io.github.resilience4j.circuitbreaker.CircuitBreakerConfig;
 import io.github.resilience4j.ratelimiter.RateLimiter;
-import io.github.resilience4j.ratelimiter.RateLimiterConfig;
 import io.github.resilience4j.retry.Retry;
-import io.github.resilience4j.retry.RetryConfig;
 import io.github.resilience4j.timelimiter.TimeLimiter;
-import io.github.resilience4j.timelimiter.TimeLimiterConfig;
+import jakarta.annotation.PreDestroy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Bean;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
-import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.function.Supplier;
 
 @Service
-
 public class OrderService {
     private static final Logger log = LoggerFactory.getLogger(OrderService.class);
+    private final CircuitBreaker circuitBreaker;
     private final Retry retry;
     private final RateLimiter rateLimiter;
     private final TimeLimiter timeLimiter;
-    private final ExecutorService executorService = Executors.newFixedThreadPool(10);
+    private final ExecutorService executorService;
     private final RestTemplate restTemplate;
     private static final String PAYMENT_SERVICE_URL = "http://localhost:8080/api/payments/process";
 
-
-    public OrderService(RestTemplate restTemplate) {
+    public OrderService(RestTemplate restTemplate, CircuitBreaker circuitBreaker, Retry retry,
+                        RateLimiter rateLimiter, TimeLimiter timeLimiter) {
         this.restTemplate = restTemplate;
-
-        RetryConfig retryConfig = RetryConfig.custom()
-                .maxAttempts(3)
-                .waitDuration(Duration.ofMillis(100))
-                .build();
-        retry = Retry.of("orderServiceRetry", retryConfig);
-
-        RateLimiterConfig rateLimiterConfig = RateLimiterConfig.custom()
-                .limitForPeriod(10)
-                .limitRefreshPeriod(Duration.ofSeconds(1))
-                .timeoutDuration(Duration.ofMillis(2))
-                .build();
-
-        rateLimiter = RateLimiter.of("orderServiceRateLimiter", rateLimiterConfig);
-
-        TimeLimiterConfig timeLimiterConfig = TimeLimiterConfig.custom()
-                .timeoutDuration(Duration.ofSeconds(2))
-                .build();
-        timeLimiter = TimeLimiter.of("orderServiceTimeLimiter", timeLimiterConfig);
+        this.circuitBreaker = circuitBreaker;
+        this.retry = retry;
+        this.rateLimiter = rateLimiter;
+        this.timeLimiter = timeLimiter;
+        this.executorService = Executors.newFixedThreadPool(10);
     }
 
-    // Phuong thuc su dung Circuit Breaker
-    public String processOrderWithCircuitBreaker(String orderId) {
-        CircuitBreakerConfig circuitBreakerConfig = CircuitBreakerConfig.custom()
-                .failureRateThreshold(100)
-                .waitDurationInOpenState(Duration.ofMillis(10))
-                .permittedNumberOfCallsInHalfOpenState(3)
-                .slidingWindowSize(5)
-                .build();
+    @PreDestroy
+    public void shutdown() {
+        log.info("Shutting down ExecutorService");
+        executorService.shutdown();
+    }
 
-        CircuitBreaker circuitBreaker = CircuitBreaker.of("orderServiceCircuitBreaker", circuitBreakerConfig);
-
-        String url = PAYMENT_SERVICE_URL + "?paymentId= " + orderId;
+    public String processOrderWithCircuitBreaker(String paymentId) {
+        String url = PAYMENT_SERVICE_URL + "?paymentId=" + paymentId;
         log.debug("Calling PaymentService URL: {}", url);
-        Supplier<String> supplier = CircuitBreaker.decorateSupplier(circuitBreaker, () ->
-        {
+        Supplier<String> supplier = CircuitBreaker.decorateSupplier(circuitBreaker, () -> {
             String result = restTemplate.postForObject(url, null, String.class);
-            log.info("Circuit breaker call succeeded for orderId: {}", orderId);
+            log.info("Circuit breaker call succeeded for paymentId: {}", paymentId);
             return result;
         });
         try {
-            String result = supplier.get();
-            log.info("Circuit breaker call result: {}", result);
-            return result;
+            return supplier.get();
         } catch (Exception e) {
-            log.error("Circuit breaker call failed for orderId: {}. Error: {}", orderId, e.getMessage());
-            throw new RuntimeException("Payment processing failed", e);
+            log.error("Circuit breaker call failed for paymentId: {}. Error: {}", paymentId, e.getMessage());
+            throw new RuntimeException("Payment processing failed: " + e.getMessage(), e);
         }
     }
 
-    // Phuong thuc su dung Retry
-    public String processOrderWithRetry(String orderId) {
-        String url = PAYMENT_SERVICE_URL + "?paymentId= " + orderId;
-        Supplier<String> supplier = Retry.decorateSupplier(retry, () ->
-                restTemplate.postForObject(url, null, String.class));
-        return supplier.get();
+    public String processOrderWithRetry(String paymentId) {
+        String url = PAYMENT_SERVICE_URL + "?paymentId=" + paymentId;
+        log.debug("Calling PaymentService URL: {}", url);
+        Supplier<String> supplier = Retry.decorateSupplier(retry, () -> {
+            String result = restTemplate.postForObject(url, null, String.class);
+            log.info("Retry call succeeded for paymentId: {}", paymentId);
+            return result;
+        });
+        try {
+            return supplier.get();
+        } catch (Exception e) {
+            log.error("Retry call failed for paymentId: {}. Error: {}", paymentId, e.getMessage());
+            throw new RuntimeException("Payment processing failed after retries: " + e.getMessage(), e);
+        }
     }
 
-    // Phuong thuc su dung Rate Limiter
-    public String processOrderWithRateLimiter(String orderId) {
-        String url = PAYMENT_SERVICE_URL + "?paymentId= " + orderId;
-        Supplier<String> supplier = RateLimiter.decorateSupplier(rateLimiter, () ->
-                restTemplate.postForObject(url, null, String.class));
-        return supplier.get();
+    public String processOrderWithRateLimiter(String paymentId) {
+        String url = PAYMENT_SERVICE_URL + "?paymentId=" + paymentId;
+        log.debug("Calling PaymentService URL: {}", url);
+        Supplier<String> supplier = RateLimiter.decorateSupplier(rateLimiter, () -> {
+            String result = restTemplate.postForObject(url, null, String.class);
+            log.info("Rate limiter call succeeded for paymentId: {}", paymentId);
+            return result;
+        });
+        try {
+            return supplier.get();
+        } catch (Exception e) {
+            log.error("Rate limiter call failed for paymentId: {}. Error: {}", paymentId, e.getMessage());
+            throw new RuntimeException("Payment processing failed: " + e.getMessage(), e);
+        }
     }
 
-    // Phuong thuc su dung Time Limiter
-    public CompletableFuture<String> processOrderWithTimeLimiter(String orderId) {
-        String url = PAYMENT_SERVICE_URL + "?paymentId= " + orderId;
-        Supplier<CompletableFuture<String>> futureSupplier = (Supplier<CompletableFuture<String>>) TimeLimiter.decorateFutureSupplier(
-                timeLimiter,
-                () -> CompletableFuture.supplyAsync(() ->
-                        restTemplate.postForObject(url, null, String.class), executorService)
-        );
-        return futureSupplier.get();
+    public CompletableFuture<String> processOrderWithTimeLimiter(String paymentId) {
+        String url = PAYMENT_SERVICE_URL + "?paymentId=" + paymentId;
+        log.debug("Calling PaymentService URL: {}", url);
+
+        Supplier<CompletableFuture<String>> futureSupplier = () ->
+            CompletableFuture.supplyAsync(() -> {
+                String result = restTemplate.postForObject(url, null, String.class);
+                log.info("Time limiter call succeeded for paymentId: {}", paymentId);
+                return result;
+            }, executorService);
+
+        CompletableFuture<String> future = (CompletableFuture<String>) TimeLimiter.decorateFutureSupplier(timeLimiter, futureSupplier);
+
+        return future.exceptionally(throwable -> {
+            log.error("Time limiter call failed for payment4j.ratelimiter.RequestNotPermittedException");
+            log.error("Time limiter call failed for paymentId: {}. Error: {}", paymentId, throwable.getMessage());
+            throw new RuntimeException("Payment processing timed out: " + throwable.getMessage(), throwable);
+        });
     }
 }

@@ -1,0 +1,32 @@
+server:
+  port: 8080
+
+resilience4j:
+  circuitbreaker:
+    instances:
+      orderCircuitBreaker:
+        slidingWindowSize: 5
+        failureRateThreshold: 50
+        waitDurationInOpenState: 10000
+        permittedNumberOfCallsInHalfOpenState: 3
+  retry:
+    instances:
+      orderRetry:
+        maxAttempts: 3
+        waitDuration: 500
+  ratelimiter:
+    instances:
+      orderRateLimiter:
+        limitForPeriod: 10
+        limitRefreshPeriod: 1000
+        timeoutDuration: 1000
+  timelimiter:
+    instances:
+      orderTimeLimiter:
+        timeoutDuration: 2000
+        cancelRunningFuture: true
+
+logging:
+  level:
+    vn.edu.iuh.fit.inventoryservice: DEBUG
+    io.github.resilience4j: DEBUG
